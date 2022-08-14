@@ -1,5 +1,5 @@
 {
-  "name": "clipdownloader",
+  "name": "twitch-clip-downloader",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
