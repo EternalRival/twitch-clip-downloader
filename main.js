@@ -21,8 +21,6 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      /* enableremotemodule: true,
-      nodeIntegration: true, */
       preload: path.join(__dirname, srcFolder, "preload.js"),
     },
   });
@@ -31,8 +29,10 @@ function createWindow() {
 }
 
 async function handleDirPick() {
+  console.log('duh')
   const { cancelled, filePaths } = await dialog.showOpenDialog({
     properties: ["openDirectory"],
   });
   if (!cancelled) return filePaths[0];
 }
+
