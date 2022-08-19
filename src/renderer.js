@@ -1,7 +1,8 @@
 const create = tag => document.createElement(tag);
 const getById = id => document.getElementById(id);
-const ipcSend = (eventName, ...args) => window.myAPI.send(eventName, ...args);
-/* const ipcGet = () => window.myAPI.projectName; */
+const ipcSend = (eventName, args) => window.myAPI.send(eventName, args);
+const listen = (eventName, callback) =>
+  window.myAPI.listen(eventName, callback);
 const ipcInvoke = (eventName, ...args) =>
   window.myAPI.invoke(eventName, ...args);
 
@@ -13,13 +14,18 @@ let btnPickFile = getById("btnPickFile");
 let pickedFile = getById("pickedFile");
 let btnPickDir = getById("btnPickDir");
 let pickedDir = getById("pickedDir");
+let btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
 
 ipcInvoke("getProjectName").then(a => (h1.innerHTML = a));
 btnClipboard.onclick = () => defaultInvoke("parseJson");
 btnOpenURL.onclick = () =>
-  defaultInvoke("openURL", getById("nickname").value.trim());
+  defaultInvoke("openURL", { nickname: getById("nickname").value.trim() });
 btnPickFile.onclick = () => pickFile();
 btnPickDir.onclick = () => pickDir();
+
+listen("ready-to-download", () => {
+  btnGottaCatchEmAll.disabled = false;
+});
 
 welcomeMessage();
 
@@ -31,21 +37,22 @@ function addLog(str) {
   div.scrollIntoView();
 }
 
-async function defaultInvoke(eventName, ...params) {
-  let args = await ipcInvoke(eventName, ...params);
+async function defaultInvoke(eventName, params) {
+  let args = await ipcInvoke(eventName, params);
   if (!args) return;
-  if (typeof args == "string") addLog(args);
-  else if (typeof args[0] == "string") addLog(args[0]);
+  addLog(args.log);
   return args;
 }
 
 function pickFile() {
   defaultInvoke("dialog:pickFile").then(
-    args => (pickedFile.innerText = args[1])
+    args => (pickedFile.innerText = args.fileName ?? "")
   );
 }
 function pickDir() {
-  defaultInvoke("dialog:pickDir").then(args => (pickedDir.innerText = args[1]));
+  defaultInvoke("dialog:pickDir").then(
+    args => (pickedDir.innerText = args.dirName ?? "")
+  );
 }
 
 function welcomeMessage() {
