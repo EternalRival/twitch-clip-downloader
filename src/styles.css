@@ -35,7 +35,7 @@ input[type="text"] {
 }
 .guide span {
   position: fixed;
-  margin-left: 1em;
+  margin-left: 0.5em;
   opacity: 0.3;
 }
 
