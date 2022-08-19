@@ -7,8 +7,16 @@ main {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #ccc;
 }
-* {
-  /* background-color: #00f2; */
+/* * {
+  background-color: #00f2;
+} */
+.release-date {
+  margin: 3px;
+  position: fixed;
+  right: 0;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  opacity: 0.3;
 }
 .flex-wrapper {
   height: 100%;
@@ -25,16 +33,24 @@ h1,
 input[type="text"] {
   outline: none;
 }
+.guide span {
+  position: fixed;
+  margin-left: 1em;
+  opacity: 0.3;
+}
 
 .log {
-  font-family: Consolas, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "HackRegular", Consolas, "Segoe UI", Tahoma, Verdana, sans-serif;
+  font-size: 15px;
   height: 200px;
-  overflow: auto;
+  width: -webkit-fill-available;
+  overflow-y: auto;
   border: 5px solid #0f0;
   border-radius: 10px;
   background-color: #000;
   color: #0f0;
-  padding: 7px;
+  padding: 0.5em;
+  scroll-padding-bottom: 1em;
 }
 
 .log::-webkit-scrollbar,
