@@ -4,63 +4,32 @@
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
   <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-  <title>Twitch Clip Downloader</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@450" />
+  <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/hack" type="text/css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <div class="release-date">18.08.22</div>
   <main class="flex-wrapper">
-    <h1>Twitch Clip Downloader</h1>
+    <h1>PROJECTNAME</h1>
     <div class="guide">
       <h2>Инструкция</h2>
       <ol>
         <li>Введи свой twitch-никнейм: <input id='nickname' type="text" size="26"></li>
         <!-- todo: отправить nickname в ноду и вызвать браузер с вкладкой по ссылке. отдать юзеру в буфер скрипт для браузера -->
-        <li>Нажми кнопку и вставь в консоль скрипт: <button id="btnClipboard">скопировать в буфер</button></li>
+        <li>Нажми кнопку и получи код: <button id="btnClipboard">скопировать в буфер</button></li>
+        <li>Открой страницу с клипами в своём браузере: <button id="btnOpenURL">🌐</button></li>
         <!-- todo: отправить файл с морды в ноду, либо отправить вызов файлпикера -->
-        <li>Добавь сюда скачанный файл: <input type="file" accept=".json" name="wtf" id="wtf"></li>
+        <li>Добавь скачанный список клипов: <button id="btnPickFile">📝</button> <span id="pickedFile"></span></li>
         <!-- todo: отправить в ноду вызов дирпикера (частично сделано) -->
-        <li>Выбери куда тебе положить видосики: <button id="btnPickDir">выбрать папку</button></li>
+        <li>Выбери куда тебе положить видосики: <button id="btnPickDir">📁</button> <span id="pickedDir"></span></li>
         <!-- todo: отправить вызов крутой функции закачки в ноде -->
-        <li>Скачай все клипы: <button>Хочу их все!</button></li>
+        <li>Скачай все клипы: <button disabled>Хочу их все!</button></li>
       </ol>
     </div>
-    <div class=" log" id="log">
-      <div>
-        1 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae nostrum at facilis autem
-        reiciendis, recusandae itaque alias minus consectetur maxime, et omnis excepturi earum sed odio.
-        Consectetur
-        pariatur accusantium ut.
-      </div>
-      <div>
-        2 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae nostrum at facilis autem
-        reiciendis, recusandae itaque alias minus consectetur maxime, et omnis excepturi earum sed odio.
-        Consectetur
-        pariatur accusantium ut.
-      </div>
-      <div>
-        3 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vitae nostrum at facilis autem
-        reiciendis, recusandae itaque alias minus consectetur maxime, et omnis excepturi earum sed odio.
-        Consectetur
-        pariatur accusantium ut.
-      </div>
-
+    <div class="log" id="log">
+      <div></div>
     </div>
-
-    <pre hidden>
-! добавить диалог с юзером:
-          если json отсутствует
-            дать в буфер скрипт для браузера || показать ему где скрипт для получения
-            открыть браузер на нужной странице || вывести ссылку для браузера
-      
-      
-      запуск - юзер вводит никнейм и получает ссылку на твич
-                юзеру выводится ссылка на скрипт
-                юзеру выводится краткая инструкция про ф12
-                юзеру говорится в какую папку нужно положить жсон
-                ждем подтверждение юзера на вопрос положил ли он жсон
-                  если не положил, говорим ему положить
-                  если положил, начать скачку даунлоадером
-                </pre>
   </main>
   <script src="./renderer.js"></script>
 </body>
