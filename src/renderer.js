@@ -1,58 +1,48 @@
 const create = tag => document.createElement(tag);
 const getById = id => document.getElementById(id);
-const ipcSend = (eventName, args) => window.myAPI.send(eventName, args);
 const listen = (eventName, callback) =>
   window.myAPI.listen(eventName, callback);
-const ipcInvoke = (eventName, ...args) =>
-  window.myAPI.invoke(eventName, ...args);
+const ipcSend = (eventName, args) => window.myAPI.send(eventName, args);
+const ipcInvoke = async (eventName, args) => {
+  const resolve = await window.myAPI.invoke(eventName, args);
+  addLog(resolve.log);
+  return resolve;
+};
 
 const h1 = document.getElementsByTagName("h1")[0];
-let logBox = getById("log");
-let btnClipboard = getById("btnClipboard");
-let btnOpenURL = getById("btnOpenURL");
-let btnPickFile = getById("btnPickFile");
-let pickedFile = getById("pickedFile");
-let btnPickDir = getById("btnPickDir");
-let pickedDir = getById("pickedDir");
-let btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
+const logBox = getById("log");
+const btnClipboard = getById("btnClipboard");
+const btnOpenURL = getById("btnOpenURL");
+const btnPickFile = getById("btnPickFile");
+const pickedFile = getById("pickedFile");
+const btnPickDir = getById("btnPickDir");
+const pickedDir = getById("pickedDir");
+const btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
 
-ipcInvoke("getProjectName").then(a => (h1.innerHTML = a));
-btnClipboard.onclick = () => defaultInvoke("parseJson");
+listen("sendProjectName", (_, str) => (h1.innerHTML = str)); 
+btnClipboard.onclick = () => ipcInvoke("btnClipboardClick");
 btnOpenURL.onclick = () =>
-  defaultInvoke("openURL", { nickname: getById("nickname").value.trim() });
+  ipcInvoke("openURL", { username: getById("username").value });
 btnPickFile.onclick = () => pickFile();
 btnPickDir.onclick = () => pickDir();
+btnGottaCatchEmAll.onclick = () => ipcSend("request-downloads");
+listen("ready-to-download", () => (btnGottaCatchEmAll.disabled = false));
 
-listen("ready-to-download", () => {
-  btnGottaCatchEmAll.disabled = false;
-});
-
-welcomeMessage();
+/* welcomeMessage(); */
 
 function addLog(str) {
   console.log(str);
-  let div = create("div");
-  div.innerHTML = str;
+  const div = create("div");
+  div.innerHTML = str.replaceAll("\n", "<br>");
   logBox.appendChild(div);
   div.scrollIntoView();
 }
 
-async function defaultInvoke(eventName, params) {
-  let args = await ipcInvoke(eventName, params);
-  if (!args) return;
-  addLog(args.log);
-  return args;
+async function pickFile() {
+  pickedFile.innerText = (await ipcInvoke("dialog:pickFile"))?.fileName;
 }
-
-function pickFile() {
-  defaultInvoke("dialog:pickFile").then(
-    args => (pickedFile.innerText = args.fileName ?? "")
-  );
-}
-function pickDir() {
-  defaultInvoke("dialog:pickDir").then(
-    args => (pickedDir.innerText = args.dirName ?? "")
-  );
+async function pickDir() {
+  pickedDir.innerText = (await ipcInvoke("dialog:pickDir"))?.dirName;
 }
 
 function welcomeMessage() {
