@@ -1,4 +1,4 @@
-const PROJECTNAME = "Twitch Clip Downloader";
+const PROJECTNAME = "ER Twitch Clip Downloader";
 const electron = require("electron");
 const process = require("process");
 const path = require("path");
@@ -39,6 +39,13 @@ function createWindow() {
     width: 800,
     height: 600,
     title: PROJECTNAME,
+    show: false,
+    /* titleBarStyle:"hiddenInset", */
+    icon: path.join(__dirname, "assets/img/icon.ico"),
+    backgroundColor: "#ccc",
+    autoHideMenuBar: true,
+    opacity: 0.95,
+
     webPreferences: {
       preload: path.join(__dirname, srcDir, "preload.js"),
     },
@@ -47,6 +54,9 @@ function createWindow() {
   win.webContents.on("did-finish-load", () =>
     win.webContents.send("send-project-name", PROJECTNAME)
   );
+  win.once("ready-to-show", () => {
+    win.show();
+  });
   //win.webContents.openDevTools();
 }
 
@@ -114,7 +124,7 @@ function readyCheck() {
 function handleRequestDownload() {
   const log = str => win.webContents.send("downloader-message", str);
   const EXTENSION = ".mp4";
-  const json = "W:\\@Inbox\\8888\\rival220822.json" || jsonFile;
+  const json = jsonFile;
   const list = JSON.parse(fs.readFileSync(json));
   let remaining = list.length;
   let pending = list.length;
