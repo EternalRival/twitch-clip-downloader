@@ -84,5 +84,5 @@ function welcomeMessage() {
     setTimeout(() => {
       welcomeDiv.innerHTML += `💬 ${msgList[i]}<br>`;
       welcomeDiv.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, (+i + 1) * 1750);
+    }, (+i + 1) * 2500);
 }
