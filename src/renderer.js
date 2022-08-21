@@ -19,7 +19,7 @@ const btnPickDir = getById("btnPickDir");
 const pickedDir = getById("pickedDir");
 const btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
 
-listen("sendProjectName", (_, str) => (h1.innerHTML = str)); 
+listen("send-project-name", (_, str) => (h1.innerHTML = str));
 btnClipboard.onclick = () => ipcInvoke("btnClipboardClick");
 btnOpenURL.onclick = () =>
   ipcInvoke("openURL", { username: getById("username").value });
@@ -27,8 +27,9 @@ btnPickFile.onclick = () => pickFile();
 btnPickDir.onclick = () => pickDir();
 btnGottaCatchEmAll.onclick = () => ipcSend("request-downloads");
 listen("ready-to-download", () => (btnGottaCatchEmAll.disabled = false));
+listen("downloader-message", (_, str) => addLog(str));
 
-/* welcomeMessage(); */
+welcomeMessage();
 
 function addLog(str) {
   console.log(str);

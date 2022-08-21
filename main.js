@@ -5,7 +5,9 @@ const path = require("path");
 const fs = require("fs");
 /* const { getAllClips } = require("./lib/downloader.js"); */
 const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = electron;
-const electronDl = require("electron-dl");
+/* const electronDl = require("electron-dl"); */
+const { fixName, getUniqueName } = require("./lib/handle-names");
+const https = require("https");
 const srcDir = "src";
 
 let win = null;
@@ -14,7 +16,6 @@ let isDirPicked = false;
 let downloadDir = null;
 let jsonFile = null;
 
-electronDl();
 app.disableHardwareAcceleration();
 app.whenReady().then(() => {
   ipcMain.handle("btnClipboardClick", onBtnClipboardClick);
@@ -44,7 +45,7 @@ function createWindow() {
   });
   win.loadFile(path.join(srcDir, "index.html"));
   win.webContents.on("did-finish-load", () =>
-    win.webContents.send("sendProjectName", PROJECTNAME)
+    win.webContents.send("send-project-name", PROJECTNAME)
   );
   //win.webContents.openDevTools();
 }
@@ -111,6 +112,48 @@ function readyCheck() {
 }
 
 function handleRequestDownload() {
+  const log = str => win.webContents.send("downloader-message", str);
+  const EXTENSION = ".mp4";
+  const json = "W:\\@Inbox\\8888\\rival220822.json" || jsonFile;
+  const list = JSON.parse(fs.readFileSync(json));
+  let remaining = list.length;
+  let pending = list.length;
+  let availableSlots = 50;
+  let queue = setInterval(() => {
+    if (remaining && availableSlots) {
+      getClip(list[--remaining]);
+      --availableSlots;
+    }
+  }, 500);
+  function getClip(clip) {
+    const title = fixName(clip.title),
+      game = fixName(clip.game),
+      author = fixName(clip.author),
+      url = clip.URL;
+    https.get(url, resolve => {
+      const dir = path.join(downloadDir, game, author),
+        file = getUniqueName(path.join(dir, title) + EXTENSION, EXTENSION),
+        short = file.slice(downloadDir.length);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+      log(`🔜 загрузка запрошена: ${short}`);
+      const download = fs.createWriteStream(file);
+      download.on("finish", () => {
+        download.close();
+        log(`💾 загрузка завершена: ${short}`);
+        ++availableSlots;
+        --pending;
+        if (pending > 0) {
+          log(`\u2198\uFE0F осталось: ${pending}`);
+        } else {
+          clearInterval(queue);
+          log(`🏁 все загрузки завершены! можно закрыть программу`);
+          shell.openPath(downloadDir);
+        }
+      });
+      resolve.pipe(download);
+    });
+  }
   /* const tjson = "W:\\@Inbox\\8888\\rival220822.json";
   const tdir = "W:\\@Inbox\\8888\\tdir";
   const list = JSON.parse(fs.readFileSync(tjson));
