@@ -23,6 +23,7 @@ function requestClipList() {
   console.log("> собираем данные клипов…");
   const clipsData = [...container.childNodes].slice(0, -1).map(node => {
     const data = [...node.querySelectorAll("h5,a")].map(e => e.title || e.href);
+    if (data.length < 4) data.splice(1, 0, "DELETED");//!костыль
     return { title: data[0], author: data[1], game: data[2], URL: data[3] };
   });
   console.log("> список сформирован");
