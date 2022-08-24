@@ -33,6 +33,10 @@ btnGottaCatchEmAll.onclick = () => {
     channel: channel.value,
     size: chunkSize.value,
   });
+  chunkSizeBox.querySelectorAll("button").forEach(b => {
+    b.disabled = true;
+  });
+  btnGottaCatchEmAll.disabled = true;
 };
 
 listen("ready-to-download", () => handleReadyToDownload());
@@ -78,7 +82,7 @@ function handleReadyToDownload() {
   chunkSize.value = 5;
   chunkSize.min = 1;
   chunkSize.max = 10;
-  chunkSize.readonly = true;
+  chunkSize.readOnly = true;
 
   [btnDec, chunkSize, btnInc].forEach(e => chunkSizeBox.append(e));
 }

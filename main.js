@@ -146,7 +146,9 @@ function handleRequestDownload(_, { channel, size }) {
   async function downloadAll(list) {
     pending = list.length;
     let chunked = chunking(list, size);
-    for (let chunk of chunked) await Promise.all(remap(chunk));
+    for (let chunk of chunked) {
+      console.log(await Promise.all(remap(chunk)));
+    }
     log(`🏁 все загрузки завершены! можно закрыть программу`);
     shell.openPath(downloadDir);
   }
