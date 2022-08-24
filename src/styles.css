@@ -9,6 +9,7 @@ main {
 }
 /* * {
   background-color: #00f2;
+  outline: 1px solid red;
 } */
 .release-date {
   margin: 3px;
@@ -64,4 +65,42 @@ input[type="text"] {
 
 .log::-webkit-scrollbar-thumb {
   background-color: #0f0;
+}
+
+.download-in-progress {
+  background-color: #fff5;
+}
+.download-finished {
+  background-color: #0f05;
+}
+
+.chunk-size-box {
+  display: inline-flex;
+  background-color: #fff;
+  border: solid #000;
+  border-width: 1px 0px;
+}
+.chunk-size-box > * {
+  text-align: center;
+  padding: 0;
+}
+input[type="number"] {
+  outline: none;
+  border: none;
+  box-sizing: border-box;
+  width: 1.1rem;
+  margin: 0;
+  padding: 1px 0;
+  cursor:default;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.chunk-size-box > button {
+  border: solid #000;
+  border-width: 0px 1px;
+  margin: 0;
+  width: 1rem;
 }
