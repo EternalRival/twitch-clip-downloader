@@ -5,8 +5,8 @@ body {
 }
 main {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #121212;
-  color: #fffc;
+ /*  background-color: #121212; */
+ /*  color: #fffc; */
 }
 /* * {
   background-color: #00f2;
@@ -18,7 +18,7 @@ main {
   right: 0;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
-  color: #fffc;
+/*   color: #fffc; */
   opacity: 0.3;
 }
 .flex-wrapper {
@@ -34,7 +34,7 @@ h1,
 }
 
 input[type="text"] {
-  opacity: 0.7;
+ /*  opacity: 0.7; */
   outline: none;
   font-weight: bold;
 }
@@ -92,7 +92,7 @@ button {
   padding: 0;
 }
 input[type="number"] {
-  opacity: 0.8;
+ /*  opacity: 0.8; */
   outline: none;
   border: none;
   box-sizing: border-box;
