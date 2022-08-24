@@ -10,7 +10,7 @@ const ipcInvoke = async (eventName, args) => {
 };
 
 const h1 = document.getElementsByTagName("h1")[0];
-const logBox = getById("log");
+const channel = getById("username");
 const btnClipboard = getById("btnClipboard");
 const btnOpenURL = getById("btnOpenURL");
 const btnPickFile = getById("btnPickFile");
@@ -18,16 +18,26 @@ const pickedFile = getById("pickedFile");
 const btnPickDir = getById("btnPickDir");
 const pickedDir = getById("pickedDir");
 const btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
+const chunkSizeBox = document.querySelector(".chunk-size-box");
+let chunkSize = null;
+const logBox = getById("log");
 
 listen("send-project-name", (_, str) => (h1.innerHTML = str));
 btnClipboard.onclick = () => ipcInvoke("btnClipboardClick");
-btnOpenURL.onclick = () =>
-  ipcInvoke("openURL", { username: getById("username").value });
+btnOpenURL.onclick = () => ipcInvoke("openURL", { username: channel.value });
 btnPickFile.onclick = () => pickFile();
 btnPickDir.onclick = () => pickDir();
-btnGottaCatchEmAll.onclick = () => ipcSend("request-downloads");
-listen("ready-to-download", () => (btnGottaCatchEmAll.disabled = false));
+btnGottaCatchEmAll.onclick = () => {
+  ipcSend("request-downloads", {
+    channel: channel.value,
+    size: chunkSize.value,
+  });
+};
+
+listen("ready-to-download", () => handleReadyToDownload());
 listen("downloader-message", (_, str) => addLog(str));
+listen("download-started", (_, args) => handleDownloadStarted(args));
+listen("download-finished", (_, args) => handleDownloadFinished(args));
 
 welcomeMessage();
 
@@ -44,6 +54,47 @@ async function pickFile() {
 }
 async function pickDir() {
   pickedDir.innerText = (await ipcInvoke("dialog:pickDir"))?.dirName;
+}
+
+function handleReadyToDownload() {
+  btnGottaCatchEmAll.disabled = false;
+  chunkSize = document.createElement("input");
+  let btnInc = document.createElement("button");
+  let btnDec = document.createElement("button");
+
+  btnInc.onclick = () => chunkSize.stepUp();
+  btnDec.onclick = () => chunkSize.stepDown();
+  btnInc.innerHTML = ">";
+  btnDec.innerHTML = "<";
+
+  chunkSizeBox.title =
+    "количество клипов для одновременной загрузки\nуменьшение затянет процесс\nувеличение ускорит процесс, но может вызвать ошибки";
+
+  chunkSize.id = "chunkSize";
+  chunkSize.type = "number";
+  chunkSize.value = 5;
+  chunkSize.min = 1;
+  chunkSize.max = 10;
+  chunkSize.readonly = true;
+
+  [btnDec, chunkSize, btnInc].forEach(e => chunkSizeBox.append(e));
+}
+
+function handleDownloadStarted(args) {
+  const div = create("div");
+  div.innerHTML = `🔜 загрузка запрошена: ${args.name}`;
+  div.id = args.id;
+  div.className = "download-in-progress";
+  logBox.appendChild(div);
+  div.scrollIntoView();
+}
+function handleDownloadFinished(args) {
+  let div = document.getElementById(args.id);
+  div.innerHTML = div.innerHTML.replace(
+    "🔜 загрузка запрошена: ",
+    "💾 загрузка завершена: "
+  );
+  div.className = "download-finished";
 }
 
 function welcomeMessage() {
@@ -84,5 +135,5 @@ function welcomeMessage() {
     setTimeout(() => {
       welcomeDiv.innerHTML += `💬 ${msgList[i]}<br>`;
       welcomeDiv.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, (+i + 1) * 2500);
+    }, (+i + 1) * 2250);
 }

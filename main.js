@@ -3,9 +3,7 @@ const electron = require("electron");
 const process = require("process");
 const path = require("path");
 const fs = require("fs");
-/* const { getAllClips } = require("./lib/downloader.js"); */
 const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = electron;
-/* const electronDl = require("electron-dl"); */
 const { fixName, getUniqueName } = require("./lib/handle-names");
 const https = require("https");
 const srcDir = "src";
@@ -13,8 +11,9 @@ const srcDir = "src";
 let win = null;
 let isFilePicked = false;
 let isDirPicked = false;
-let downloadDir = null;
-let jsonFile = null;
+let downloadDir = null || "W:\\@Inbox\\8888\\tdir";
+let jsonFile = null || "W:\\@Inbox\\8888\\rival220822.json";
+let streamer = "Streamer";
 
 app.disableHardwareAcceleration();
 app.whenReady().then(() => {
@@ -22,7 +21,7 @@ app.whenReady().then(() => {
   ipcMain.handle("openURL", handleOpenURL);
   ipcMain.handle("dialog:pickFile", handleFilePick);
   ipcMain.handle("dialog:pickDir", handleDirPick);
-  ipcMain.on("request-downloads", handleRequestDownload);
+  ipcMain.once("request-downloads", handleRequestDownload);
 
   createWindow();
   app.on("activate", () => {
@@ -40,7 +39,6 @@ function createWindow() {
     height: 600,
     title: PROJECTNAME,
     show: false,
-    /* titleBarStyle:"hiddenInset", */
     icon: path.join(__dirname, "assets/img/icon.ico"),
     backgroundColor: "#ccc",
     autoHideMenuBar: true,
@@ -51,17 +49,21 @@ function createWindow() {
     },
   });
   win.loadFile(path.join(srcDir, "index.html"));
-  win.webContents.on("did-finish-load", () =>
-    win.webContents.send("send-project-name", PROJECTNAME)
-  );
+  win.webContents.on("did-finish-load", () => {
+    win.webContents.send("send-project-name", PROJECTNAME);
+    /* win.webContents.send("ready-to-download"); */
+  });
   win.once("ready-to-show", () => {
     win.show();
   });
+
   //win.webContents.openDevTools();
 }
 
 function onBtnClipboardClick() {
-  clipboard.writeText(fs.readFileSync("./scripts/for-browser.js", "utf8"));
+  clipboard.writeText(
+    fs.readFileSync(path.join(__dirname + "/scripts/for-browser.js"), "utf8")
+  );
   return { log: "📑 код для devtools-консоли скопирован в буфер обмена" };
 }
 
@@ -121,100 +123,62 @@ function readyCheck() {
   if (isFilePicked && isDirPicked) win.webContents.send("ready-to-download");
 }
 
-function handleRequestDownload() {
+function handleRequestDownload(_, { channel, size }) {
+  let idNumber = 0;
   const log = str => win.webContents.send("downloader-message", str);
   const EXTENSION = ".mp4";
-  const json = jsonFile;
-  const list = JSON.parse(fs.readFileSync(json));
-  let remaining = list.length;
-  let pending = list.length;
-  let availableSlots = 50;
-  let queue = setInterval(() => {
-    if (remaining && availableSlots) {
-      getClip(list[--remaining]);
-      --availableSlots;
-    }
-  }, 500);
-  function getClip(clip) {
-    const title = fixName(clip.title),
-      game = fixName(clip.game),
-      author = fixName(clip.author),
-      url = clip.URL;
-    https.get(url, resolve => {
-      const dir = path.join(downloadDir, game, author),
-        file = getUniqueName(path.join(dir, title) + EXTENSION, EXTENSION),
-        short = file.slice(downloadDir.length);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  let list = JSON.parse(fs.readFileSync(jsonFile)).reduce((p, c) => {
+    let name = path.join(
+      downloadDir,
+      channel || streamer,
+      fixName(c.game),
+      fixName(c.author),
+      fixName(c.title) + EXTENSION
+    );
 
-      log(`🔜 загрузка запрошена: ${short}`);
-      const download = fs.createWriteStream(file);
-      download.on("finish", () => {
-        download.close();
-        log(`💾 загрузка завершена: ${short}`);
-        ++availableSlots;
-        --pending;
-        if (pending > 0) {
-          log(`\u2198\uFE0F осталось: ${pending}`);
-        } else {
-          clearInterval(queue);
-          log(`🏁 все загрузки завершены! можно закрыть программу`);
-          shell.openPath(downloadDir);
-        }
-      });
-      resolve.pipe(download);
-    });
+    return [...p, { name: getUniqueName(name, p), url: c.URL }];
+  }, []);
+
+  downloadAll(list);
+
+  async function downloadAll(list) {
+    let chunked = chunking(list, size);
+    for (let chunk of chunked) await Promise.all(remap(chunk));
+    log(`🏁 все загрузки завершены! можно закрыть программу`);
+    shell.openPath(downloadDir);
   }
-  /* const tjson = "W:\\@Inbox\\8888\\rival220822.json";
-  const tdir = "W:\\@Inbox\\8888\\tdir";
-  const list = JSON.parse(fs.readFileSync(tjson));
-  let a = list[0];
-  let b = list.at(-1);
 
-  electronDl.download(win, a.URL, {
-    directory: "W:\\@Inbox\\8888\\tdir",
-    filename: a.title + ".mp4",
-  });
+  function chunking(list, size) {
+    return list.reduce((p, c, i) => {
+      return i % size == 0 ? [...p, [c]] : [...p.slice(0, -1), [...p.pop(), c]];
+    }, []);
+  }
 
-  electronDl.download(win, b.URL, {
-    directory: "W:\\@Inbox\\8888\\tdir",
-    filename: b.title + ".mp4",
-  }); */
-}
-/* 
-function download(e) {
-  return new Promise(resolve => {
-    resolve(
-      electronDl.download(win, e.URL, {
-        directory: "W:\\@Inbox\\8888\\tdir",
-        filename: e.title + ".mp4",
+  function remap(list) {
+    return list.map(e => dl(e));
+  }
+
+  function dl(clip) {
+    const args = { id: `id${idNumber++}`, name: path.basename(clip.name) };
+    const dirName = path.dirname(clip.name);
+    if (!fs.existsSync(dirName)) fs.mkdirSync(dirName, { recursive: true });
+    return new Promise((resolve, reject) =>
+      https.get(clip.url, res => {
+        const stream = fs.createWriteStream(clip.name);
+        stream
+          .on("finish", () => {
+            stream.close();
+            win.webContents.send("download-finished", args);
+            resolve(clip.name);
+          })
+          .on("error", err => {
+            reject(err.message);
+          })
+          .on("pipe", () => {
+            win.webContents.send("download-started", args);
+          });
+        res.pipe(stream);
       })
     );
-  });
-} */
-/* 
-async function as1() {
-  return 52;
+  }
 }
-async function as2() {}
-
-let ass1, ass2, ass3, ass4, ass5, ass6;
-(async () => {
-  ass1 = as1();
-  ass2 = as2();
-  as1().then(v => {
-    ass3 = v;
-  });
-  as2().then(v => {
-    ass4 = v;
-  });
-  ass5 = await as1();
-  ass6 = await as2();
-
-  console.log(ass1);
-  console.log(ass2);
-  console.log(ass3);
-  console.log(ass4);
-  console.log(ass5);
-  console.log(ass6);
-})();
- */
