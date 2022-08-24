@@ -15,6 +15,7 @@ let downloadDir = null || "W:\\@Inbox\\8888\\tdir";
 let jsonFile = null || "W:\\@Inbox\\8888\\rival220822.json";
 let streamer = "Streamer";
 
+electron.nativeTheme.themeSource = "dark";
 app.disableHardwareAcceleration();
 app.whenReady().then(() => {
   ipcMain.handle("btnClipboardClick", onBtnClipboardClick);
@@ -42,7 +43,7 @@ function createWindow() {
     icon: path.join(__dirname, "assets/img/icon.ico"),
     backgroundColor: "#ccc",
     autoHideMenuBar: true,
-    opacity: 0.95,
+    opacity: 0.975,
 
     webPreferences: {
       preload: path.join(__dirname, srcDir, "preload.js"),
@@ -125,6 +126,7 @@ function readyCheck() {
 
 function handleRequestDownload(_, { channel, size }) {
   let idNumber = 0;
+  let pending = null;
   const log = str => win.webContents.send("downloader-message", str);
   const EXTENSION = ".mp4";
   let list = JSON.parse(fs.readFileSync(jsonFile)).reduce((p, c) => {
@@ -142,6 +144,7 @@ function handleRequestDownload(_, { channel, size }) {
   downloadAll(list);
 
   async function downloadAll(list) {
+    pending = list.length;
     let chunked = chunking(list, size);
     for (let chunk of chunked) await Promise.all(remap(chunk));
     log(`🏁 все загрузки завершены! можно закрыть программу`);
@@ -167,8 +170,10 @@ function handleRequestDownload(_, { channel, size }) {
         const stream = fs.createWriteStream(clip.name);
         stream
           .on("finish", () => {
+            --pending;
             stream.close();
             win.webContents.send("download-finished", args);
+            win.webContents.send("pending-counter", { counter: pending || "" });
             resolve(clip.name);
           })
           .on("error", err => {

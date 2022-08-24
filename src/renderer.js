@@ -21,6 +21,7 @@ const btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
 const chunkSizeBox = document.querySelector(".chunk-size-box");
 let chunkSize = null;
 const logBox = getById("log");
+const pending = document.querySelector(".pending-counter");
 
 listen("send-project-name", (_, str) => (h1.innerHTML = str));
 btnClipboard.onclick = () => ipcInvoke("btnClipboardClick");
@@ -38,6 +39,7 @@ listen("ready-to-download", () => handleReadyToDownload());
 listen("downloader-message", (_, str) => addLog(str));
 listen("download-started", (_, args) => handleDownloadStarted(args));
 listen("download-finished", (_, args) => handleDownloadFinished(args));
+listen("pending-counter", (_, args) => (pending.innerHTML = args.counter));
 
 welcomeMessage();
 
@@ -57,6 +59,7 @@ async function pickDir() {
 }
 
 function handleReadyToDownload() {
+  if (chunkSize) return;
   btnGottaCatchEmAll.disabled = false;
   chunkSize = document.createElement("input");
   let btnInc = document.createElement("button");
