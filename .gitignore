@@ -133,4 +133,4 @@ dist
 
 public/download
 public/json/*.json
-
+.vscode
