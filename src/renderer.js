@@ -21,7 +21,7 @@ const btnGottaCatchEmAll = getById("btnGottaCatchEmAll");
 const chunkSizeBox = document.querySelector(".chunk-size-box");
 let chunkSize = null;
 const logBox = getById("log");
-const pending = document.querySelector(".pending-counter");
+const progressTotalBar = document.querySelector(".progress-counter>progress");
 
 listen("send-project-name", (_, str) => (h1.innerHTML = str));
 btnClipboard.onclick = () => ipcInvoke("btnClipboardClick");
@@ -43,7 +43,7 @@ listen("ready-to-download", () => handleReadyToDownload());
 listen("downloader-message", (_, str) => addLog(str));
 listen("download-started", (_, args) => handleDownloadStarted(args));
 listen("download-finished", (_, args) => handleDownloadFinished(args));
-listen("pending-counter", (_, args) => (pending.innerHTML = args.counter));
+listen("progress-counter", (_, args) => renderProgressCounter(args));
 
 welcomeMessage();
 
@@ -143,4 +143,14 @@ function welcomeMessage() {
       welcomeDiv.innerHTML += `💬 ${msgList[i]}<br>`;
       welcomeDiv.scrollIntoView({ behavior: "smooth", block: "end" });
     }, (+i + 1) * 2250);
+}
+
+function renderProgressCounter(args) {
+  const pending = +args.counter;
+  if (progressTotalBar.max == 1) progressTotalBar.max = pending + 1;
+  if (progressTotalBar.hidden) progressTotalBar.hidden = false;
+  progressTotalBar.value = progressTotalBar.max - pending;
+  const { max, value } = progressTotalBar;
+  const currentPercent = Math.round((value / max) * 100);
+  progressTotalBar.previousElementSibling.innerHTML = `${value} / ${max} (${currentPercent}%)`;
 }

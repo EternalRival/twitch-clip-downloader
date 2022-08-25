@@ -5,10 +5,10 @@ body {
 }
 main {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
- /*  background-color: #121212; */
- /*  color: #fffc; */
+  /*  background-color: #121212; */
+  /*  color: #fffc; */
 }
-/* * {
+/* *:not(progress) {
   background-color: #00f2;
   outline: 1px solid red;
 } */
@@ -18,7 +18,7 @@ main {
   right: 0;
   font-family: "Roboto", sans-serif;
   font-size: 14px;
-/*   color: #fffc; */
+  /*   color: #fffc; */
   opacity: 0.3;
 }
 .flex-wrapper {
@@ -26,15 +26,17 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-around;
 }
 h1,
 .guide {
   cursor: default;
+  margin-top: 1.9rem;
+  margin-bottom: 0;
 }
 
 input[type="text"] {
- /*  opacity: 0.7; */
+  /*  opacity: 0.7; */
   outline: none;
   font-weight: bold;
 }
@@ -46,13 +48,18 @@ button {
   margin-left: 0.5em;
   opacity: 0.3;
 }
-
-.log {
+.log-box {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  width: -webkit-fill-available;
+  height: 230px;
+}
+.log {
+  box-sizing: border-box;
   font-family: "HackRegular", Consolas, "Segoe UI", Tahoma, Verdana, sans-serif;
   font-size: 15px;
-  height: 200px;
-  width: -webkit-fill-available;
   overflow-y: auto;
   border: 5px solid #0f0;
   border-radius: 10px;
@@ -60,6 +67,8 @@ button {
   color: #0f0;
   padding: 0.5em;
   scroll-padding-bottom: 1em;
+
+  flex-grow: 1;
 }
 
 .log::-webkit-scrollbar,
@@ -92,7 +101,7 @@ button {
   padding: 0;
 }
 input[type="number"] {
- /*  opacity: 0.8; */
+  /*  opacity: 0.8; */
   outline: none;
   border: none;
   box-sizing: border-box;
@@ -112,14 +121,33 @@ input[type="number"]::-webkit-outer-spin-button {
   margin: 0;
   width: 1rem;
 }
-.pending-counter {
+.progress-counter {
+  position: relative;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  margin: 0 0 240px 0;
-  width: 35px;
-  height: 35px;
+  width: 100%;
+  flex-basis: 26px;
+  flex-shrink: 0;
+}
+.progress-counter > div {
+  position: absolute;
+  font-size: 14px;
+  margin-top: 7px;
+}
+
+.progress-counter > progress {
+  position: relative;
+  top: 10px;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  border-bottom: 5px solid #0f0;
+}
+.progress-counter > progress::-webkit-progress-value {
+  background: #0d0;
+}
+.progress-counter > progress::-webkit-progress-bar {
+  background: #080;
 }

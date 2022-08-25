@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <div class="release-date">24.08.22</div>
+  <div class="release-date">26.08.22</div>
   <main class="flex-wrapper">
     <h1>PROJECTNAME</h1>
     <div class="guide">
@@ -25,9 +25,13 @@
         </li>
       </ol>
     </div>
-    <div class="pending-counter"></div>
-    <div class="log" id="log">
-      <div></div>
+    <div class="log-box">
+      <div class="progress-counter">
+        <div></div><progress hidden></progress>
+      </div>
+      <div class="log" id="log">
+        <div></div>
+      </div>
     </div>
   </main>
   <script src="./renderer.js"></script>

@@ -175,7 +175,7 @@ function handleRequestDownload(_, { channel, size }) {
             --pending;
             stream.close();
             win.webContents.send("download-finished", args);
-            win.webContents.send("pending-counter", { counter: pending || "" });
+            win.webContents.send("progress-counter", { counter: pending });
             resolve(clip.name);
           })
           .on("error", err => {
