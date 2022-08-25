@@ -149,7 +149,7 @@ function handleRequestDownload(_, { channel, size }) {
     for (let chunk of chunked) {
       console.log(await Promise.all(remap(chunk)));
     }
-    log(`🏁 все загрузки завершены! можно закрыть программу`);
+    log("🏁 все загрузки завершены! можно закрыть программу");
     shell.openPath(downloadDir);
   }
 
