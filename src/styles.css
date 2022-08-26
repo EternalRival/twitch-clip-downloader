@@ -95,11 +95,11 @@ button {
   display: inline-flex;
   border: solid #000;
   border-width: 1px 0px;
-  cursor: help;
 }
 .chunk-size-box > * {
   text-align: center;
   padding: 0;
+  cursor: help;
 }
 input[type="number"] {
   /*  opacity: 0.8; */
@@ -109,7 +109,6 @@ input[type="number"] {
   width: 1.5rem;
   margin: 0;
   padding: 1px 0;
-  cursor: default;
 }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
