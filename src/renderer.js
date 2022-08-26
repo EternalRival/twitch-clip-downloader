@@ -44,6 +44,7 @@ listen("downloader-message", (_, str) => addLog(str));
 listen("download-started", (_, args) => handleDownloadStarted(args));
 listen("download-finished", (_, args) => handleDownloadFinished(args));
 listen("progress-counter", (_, args) => renderProgressCounter(args));
+listen("got-error", (_, args) => handleErrorMessage(args.err));
 
 welcomeMessage();
 
@@ -102,6 +103,14 @@ function handleDownloadFinished(args) {
     "💾 загрузка завершена: "
   );
   div.className = "download-finished";
+}
+function handleErrorMessage(str) {
+  console.log(str);
+  const div = create("div");
+  div.innerHTML = str.replaceAll("\n", "<br>");
+  div.style.backgroundColor = "#f005";
+  logBox.appendChild(div);
+  div.scrollIntoView();
 }
 
 function welcomeMessage() {

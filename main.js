@@ -6,8 +6,11 @@ const fs = require("fs");
 const { app, BrowserWindow, clipboard, dialog, ipcMain, shell } = electron;
 const { fixName, getUniqueName } = require("./lib/handle-names");
 const https = require("https");
-const srcDir = "src";
+const axios = require("axios");
+axios.defaults.timeout = 600000;
+axios.defaults.httpsAgent = new https.Agent({ keepAlive: true });
 
+const srcDir = "src";
 let win = null;
 let isFilePicked = false;
 let isDirPicked = false;
@@ -146,8 +149,22 @@ function handleRequestDownload(_, { channel, size }) {
   async function downloadAll(list) {
     pending = list.length;
     let chunked = chunking(list, size);
-    for (let chunk of chunked) {
-      await Promise.all(remap(chunk));
+    try {
+      for (let chunk of chunked) {
+        await Promise.all(remap(chunk)).catch(() => {
+          console.log(">>> promiseall error");
+          win.webContents.send("got-error", {
+            err: ">>> promiseall error",
+          });
+        });
+      }
+    } catch (error) {
+      () => {
+        console.log(">>> forloop error");
+        win.webContents.send("got-error", {
+          err: ">>> forloop error",
+        });
+      };
     }
     log("🏁 все загрузки завершены! можно закрыть программу");
     shell.openPath(downloadDir);
@@ -167,8 +184,40 @@ function handleRequestDownload(_, { channel, size }) {
     const args = { id: `id${idNumber++}`, name: path.basename(clip.name) };
     const dirName = path.dirname(clip.name);
     if (!fs.existsSync(dirName)) fs.mkdirSync(dirName, { recursive: true });
-    return new Promise((resolve, reject) =>
-      https.get(clip.url, res => {
+    return new Promise(
+      (resolve, reject) =>
+        axios
+          .get(clip.url, { method: "GET", responseType: "stream" })
+          .then(res => {
+            const stream = fs.createWriteStream(clip.name);
+            stream
+              .on("finish", () => {
+                --pending;
+                stream.close();
+                win.webContents.send("download-finished", args);
+                win.webContents.send("progress-counter", { counter: pending });
+                resolve(clip.name);
+              })
+              .on("error", err => {
+                console.log(">>>stream error");
+                win.webContents.send("got-error", {
+                  err: ">>> stream error",
+                });
+                reject(err.message);
+              })
+              .on("pipe", () => {
+                win.webContents.send("download-started", args);
+              });
+            res.data.pipe(stream);
+          })
+          .catch(() => {
+            console.log(">>>axios error");
+            win.webContents.send("got-error", {
+              err: ">>> axios error",
+            });
+          })
+
+      /* https.get(clip.url, res => {
         const stream = fs.createWriteStream(clip.name);
         stream
           .on("finish", () => {
@@ -185,7 +234,7 @@ function handleRequestDownload(_, { channel, size }) {
             win.webContents.send("download-started", args);
           });
         res.pipe(stream);
-      })
+      }) */
     );
   }
 }
