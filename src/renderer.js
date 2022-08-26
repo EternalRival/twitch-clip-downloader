@@ -70,19 +70,25 @@ function handleReadyToDownload() {
   let btnInc = document.createElement("button");
   let btnDec = document.createElement("button");
 
-  btnInc.onclick = () => chunkSize.stepUp();
-  btnDec.onclick = () => chunkSize.stepDown();
+  btnInc.onclick = () =>
+    chunkSize.value >= 10 && chunkSize.value < 100
+      ? (chunkSize.value -= -5)
+      : chunkSize.stepUp();
+  btnDec.onclick = () =>
+    chunkSize.value > 10 && chunkSize.value <= 100
+      ? (chunkSize.value -= 5)
+      : chunkSize.stepDown();
   btnInc.innerHTML = ">";
   btnDec.innerHTML = "<";
 
   chunkSizeBox.title =
-    "количество клипов для одновременной загрузки\nуменьшение затянет процесс\nувеличение ускорит процесс, но может вызвать ошибки";
+    "количество клипов для одновременной загрузки\nустановлено оптимальное значение для интернета 100 Мбит/с\nуменьшение затянет процесс\nувеличение ускорит процесс, но сожрёт весь твой интернет";
 
   chunkSize.id = "chunkSize";
   chunkSize.type = "number";
   chunkSize.value = 5;
   chunkSize.min = 1;
-  chunkSize.max = 10;
+  chunkSize.max = 100;
   chunkSize.readOnly = true;
 
   [btnDec, chunkSize, btnInc].forEach(e => chunkSizeBox.append(e));
