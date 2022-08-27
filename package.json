@@ -1,15 +1,54 @@
 {
-  "name": "twitch-clip-downloader",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "type": "module",
+  "name": "er-twitch-clip-downloader",
+  "version": "1.2.0",
+  "description": "twitch clip downloader app",
+  "main": "main.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "app": "electron .",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make --icon './assets/img/icon.ico'"
   },
   "author": "erdev",
   "license": "MIT",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.65",
+    "@electron-forge/maker-deb": "^6.0.0-beta.65",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.65",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.65",
+    "@electron-forge/maker-zip": "^6.0.0-beta.65",
+    "@rabbitholesyndrome/electron-forge-maker-portable": "^0.1.1",
+    "electron": "^20.0.2",
     "eslint": "^8.22.0"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "appId": "er-app-id",
+            "win": {
+              "icon": "assets/img/icon.ico"
+            }
+          }
+        },
+        {
+          "name": "@rabbitholesyndrome/electron-forge-maker-portable",
+          "config": {
+            "appId": "er-app-id",
+            "win": {
+              "icon": "assets/img/icon.ico"
+            }
+          }
+        }
+      ]
+    }
   }
 }
